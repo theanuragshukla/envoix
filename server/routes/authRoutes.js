@@ -1,8 +1,10 @@
 const Router = require("express").Router;
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const { validationResult } = require("express-validator");
 
 const authMiddleware = require("../middlewares/authMiddleware");
+const db = require("../datasource/pg");
 const { generateRandomString } = require("../utils/utilFuncs");
 const { validate } = require("../utils/validate");
 const { loginSchema } = require("../schemas/loginSchema");
@@ -34,7 +36,7 @@ authRouter.post("/signup", validate(addUserSchema), async (req, res) => {
     .save({ name, email, password, uid });
 
   const payload = {
-    name: userExists.name,
+    name: user.name,
     uid: user.uid,
     email: user.email,
   };

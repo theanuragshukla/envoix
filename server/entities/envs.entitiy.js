@@ -14,12 +14,15 @@ const envs = new EntitySchema({
       generated: "uuid",
       unique: true,
     },
+    env_path: {
+      type: "text",
+    },
     name: {
       type: "text",
     },
     env_data: {
       type: "text",
-      nullable: true,
+      default:""
     },
     owner: {
       type: "varchar",

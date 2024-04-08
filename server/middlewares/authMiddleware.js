@@ -1,3 +1,6 @@
+const jwt = require("jsonwebtoken");
+const JWT_SECRET = process.env.JWT_SECRET;
+
 const authMiddleware = (req, res, next) => {
   try {
     const token = req.headers["x-auth-token"];
@@ -8,8 +11,11 @@ const authMiddleware = (req, res, next) => {
     req.user = decoded;
     next();
   } catch (err) {
-    res.status(401).json({ status: false, msg: "Unauthorized" });
+    console.log(err);
+    res
+      .status(401)
+      .json({ status: false, msg: "Unauthorized", errors: err.message });
   }
-}
+};
 
-module.exports = authMiddleware
+module.exports = authMiddleware;

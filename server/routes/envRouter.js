@@ -4,6 +4,7 @@ const { validationResult } = require("express-validator");
 const { validate } = require("../utils/validate");
 const { addEnvSchema } = require("../schemas/addEnvSchema");
 const permissionMiddleware = require("../middlewares/permissionMiddleware");
+const db = require("../datasource/pg");
 
 const envRouter = Router();
 
@@ -23,22 +24,38 @@ envRouter.post("/add", validate(addEnvSchema), async (req, res) => {
       errors: errors.array(),
     });
   }
-  const { name, env_data } = req.body;
-  const env = await db.pgDataSource
-    .getRepository("envs")
-    .save({ name, env_data, owner: req.user.uid });
-  await db.pgDataSource.getRepository("envPermission").save({
-    env_id: env.env_id,
-    permission: ["admin"],
-    email: req.user.email,
+  const { name, env_data, env_path } = req.body;
+
+  let env;
+
+  await db.pgDataSource.manager.transaction(async (manager) => {
+    env = await manager
+      .getRepository("envs")
+      .save({ name, env_path, env_data, owner: req.user.uid });
+    await manager.getRepository("envPermissions").save({
+      env_id: env.env_id,
+      permission: ["admin"],
+      user_email: req.user.email,
+    });
   });
-  res.json({ status: true, msg: "Environment added", data: env });
+
+  res.json({
+    status: true,
+    msg: "Environment added",
+    data: {
+      env_id: env.env_id,
+      name: env.name,
+      env_path: env.env_path,
+      env_data: env.env_data,
+    },
+  });
 });
 
 envRouter.use(permissionMiddleware);
 
 envRouter.get("/:env_id", async (req, res) => {
   if (!req.permissions) {
+    console.log(req.permissions);
     return res.json({ status: false, msg: "Permission denied" });
   }
   if (
@@ -55,15 +72,17 @@ envRouter.get("/:env_id", async (req, res) => {
 envRouter.post("/:env_id/permissions/add", async (req, res) => {
   if (
     !req.permissions ||
-    !req.permissions.permission.includes("add_user") ||
-    !req.permissions.permission.includes("admin")
+    !(
+      req.permissions.permission.includes("add_user") ||
+      req.permissions.permission.includes("admin")
+    )
   ) {
     return res.json({ status: false, msg: "Permission denied" });
   }
   const { user_email, permission } = req.body;
   const env = await db.pgDataSource
     .getRepository("envs")
-    .findOneBy({ env_id: req.params.env_id, owner: req.user.uid });
+    .findOneBy({ env_id: req.params.env_id });
   if (!env) {
     return res.json({ status: false, msg: "Environment not found" });
   }
@@ -82,15 +101,17 @@ envRouter.post("/:env_id/permissions/add", async (req, res) => {
 envRouter.post("/:env_id/permissions/update", async (req, res) => {
   if (
     !req.permissions ||
-    !req.permissions.permission.includes("add_user") ||
-    !req.permissions.permission.includes("admin")
+    !(
+      req.permissions.permission.includes("update_user") ||
+      req.permissions.permission.includes("admin")
+    )
   ) {
     return res.json({ status: false, msg: "Permission denied" });
   }
   const { user_email, permission } = req.body;
   const env = await db.pgDataSource
     .getRepository("envs")
-    .findOneBy({ env_id: req.params.env_id, owner: req.user.uid });
+    .findOneBy({ env_id: req.params.env_id });
   if (!env) {
     return res.json({ status: false, msg: "Environment not found" });
   }
@@ -109,15 +130,17 @@ envRouter.post("/:env_id/permissions/update", async (req, res) => {
 envRouter.post("/:env_id/permissions/remove", async (req, res) => {
   if (
     !req.permissions ||
-    !req.permissions.permission.includes("remove_user") ||
-    !req.permissions.permission.includes("admin")
+    !(
+      req.permissions.permission.includes("remove_user") ||
+      req.permissions.permission.includes("admin")
+    )
   ) {
     return res.json({ status: false, msg: "Permission denied" });
   }
   const { user_email } = req.body;
   const env = await db.pgDataSource
     .getRepository("envs")
-    .findOneBy({ env_id: req.params.env_id, owner: req.user.uid });
+    .findOneBy({ env_id: req.params.env_id });
   if (!env) {
     return res.json({ status: false, msg: "Environment not found" });
   }
@@ -136,15 +159,17 @@ envRouter.post("/:env_id/permissions/remove", async (req, res) => {
 envRouter.post("/:env_id/update", async (req, res) => {
   if (
     !req.permissions ||
-    !req.permissions.permission.includes("admin") ||
-    !req.permissions.permission.includes("push")
+    !(
+      req.permissions.permission.includes("admin") ||
+      req.permissions.permission.includes("push")
+    )
   ) {
     return res.json({ status: false, msg: "Permission denied" });
   }
   const { name, env_data } = req.body;
   const env = await db.pgDataSource
     .getRepository("envs")
-    .findOneBy({ env_id: req.params.env_id, owner: req.user.uid });
+    .findOneBy({ env_id: req.params.env_id });
   if (!env) {
     return res.json({ status: false, msg: "Environment not found" });
   }
@@ -174,10 +199,26 @@ envRouter.get("/:env_id/permissions", async (req, res) => {
   if (!req.permissions || !req.permissions.permission.includes("admin")) {
     return res.json({ status: false, msg: "Permission denied" });
   }
+
+  const env = await db.pgDataSource
+    .getRepository("envs")
+    .findOneBy({ env_id: req.params.env_id, owner: req.user.uid });
+
+  if (!env) {
+    return res.json({ status: false, msg: "Permission denied" });
+  }
+
   const permissions = await db.pgDataSource
     .getRepository("envPermissions")
     .findBy({ env_id: req.params.env_id });
-  res.json({ status: true, msg: "Permissions", data: permissions });
+  res.json({
+    status: true,
+    msg: "Permissions",
+    data: permissions.map((obj) => ({
+      user_email: obj.user_email,
+      permission: obj.permission,
+    })),
+  });
 });
 
-module.exports = envRouter
+module.exports = envRouter;
