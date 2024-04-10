@@ -1,6 +1,11 @@
 import inquirer from "inquirer";
 
-import { getProfile, isLoggedIn, setAuthToken, setProfile } from "../config/index.js";
+import {
+  getProfile,
+  isLoggedIn,
+  setAuthToken,
+  setProfile,
+} from "../config/index.js";
 import { printColor } from "../utils.js";
 import { login, signup } from "../data/managers/auth.js";
 
@@ -26,7 +31,12 @@ export const signupHandler = async () => {
   const { name, email, password } = await inquirer.prompt([
     { type: "input", name: "name", message: "Enter your name:" },
     { type: "input", name: "email", message: "Enter your email:" },
-    { type: "password", name: "password", message: "Enter your password:" },
+    {
+      type: "password",
+      name: "password",
+      message: "Enter your password:",
+      mask: "*",
+    },
   ]);
 
   const response = await signup({ name, email, password });
@@ -42,7 +52,12 @@ export const loginHandler = async () => {
 
   const { email, password } = await inquirer.prompt([
     { type: "input", name: "email", message: "Enter your email:" },
-    { type: "password", name: "password", message: "Enter your password:" },
+    {
+      type: "password",
+      name: "password",
+      message: "Enter your password:",
+      mask: "*",
+    },
   ]);
   const response = await login({ email, password });
   handleLoginResponse(response);

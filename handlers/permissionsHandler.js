@@ -18,12 +18,20 @@ export const addUserHandler = async () => {
       type: "checkbox",
       name: "permission",
       message: "Select permissions",
-      choices: ["push", "pull", "admin", "add_user", "remove_user"],
+      default: ["pull"],
+      choices: [
+        "pull",
+        "push",
+        "add_user",
+        "remove_user",
+        "update_user",
+        "admin",
+      ],
     },
     {
       type: "input",
       name: "otp",
-      message: "Enter OTP:",
+      message: "Enter Access code:",
     },
     {
       type: "password",
@@ -85,7 +93,15 @@ export const updateUserHandler = async () => {
       type: "checkbox",
       name: "permission",
       message: "Select permissions",
-      choices: ["push", "pull", "admin", "add_user", "remove_user"],
+      default: ["pull"],
+      choices: [
+        "pull",
+        "push",
+        "add_user",
+        "remove_user",
+        "update_user",
+        "admin",
+      ],
     },
   ]);
   const response = await updateUser({
