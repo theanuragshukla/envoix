@@ -1,7 +1,8 @@
+import { SERVER_URL } from "../../constants.js";
 import { getClient } from "../client.js";
 import { reqModal } from "./auth.js";
 
-const serverURL = process.env.SERVER_URL || "http://localhost:8000";
+const serverURL = SERVER_URL || "http://localhost:8000";
 const baseURL = `${serverURL}/envs`;
 
 export const addUser = ({id, values}) => {

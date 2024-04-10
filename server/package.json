@@ -1,14 +1,14 @@
 {
-  "name": "server",
+  "name": "envoix-server",
   "version": "1.0.0",
-  "description": "",
+  "description": "Server for Envoix-cli",
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
     "dev": "nodemon index.js"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": ["envoix", "server"],
+  "author": "https://github.com/theanuragshukla",
   "license": "ISC",
   "dependencies": {
     "bcryptjs": "^2.4.3",

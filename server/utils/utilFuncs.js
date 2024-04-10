@@ -1,3 +1,6 @@
+const crypto = require("crypto");
+const { CIPHER_PREFIX } = require("../constants");
+
 const generateRandomString = (length = 16) => {
   let result = "";
   const characters =
@@ -9,4 +12,14 @@ const generateRandomString = (length = 16) => {
   return result;
 };
 
-module.exports = { generateRandomString };
+const createHash = (str, len) => {
+  return crypto
+    .createHash("sha512")
+    .update(CIPHER_PREFIX)
+    .update(str)
+    .digest()
+    .toString("hex")
+    .substring(0, len);
+};
+
+module.exports = { generateRandomString, createHash };

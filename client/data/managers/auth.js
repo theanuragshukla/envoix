@@ -1,6 +1,7 @@
+import { SERVER_URL } from "../../constants.js";
 import { getClient } from "../client.js";
 
-const serverURL = process.env.SERVER_URL || "http://localhost:8000";
+const serverURL = SERVER_URL || "http://localhost:8000";
 const baseURL = `${serverURL}/auth`
 
 export const reqModal = async (func) => {
@@ -11,11 +12,13 @@ export const reqModal = async (func) => {
     } else {
       return {
         status: false,
+        code: status,
         msg: `request failed with code ${status}`,
       };
     }
   } catch (e) {
     return {
+      code: e.response?.status || 500,
       status: false,
       msg: "Something Unexpected happened",
     };

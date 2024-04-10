@@ -23,7 +23,7 @@ db.pgDataSource
   });
 
 app.get("/", (_, res) => {
-  res.json({ status: true, msg: "Hello World" });
+  res.json({ status: true, msg: "Hello World!" });
 });
 
 app.use("/auth", authRouter);

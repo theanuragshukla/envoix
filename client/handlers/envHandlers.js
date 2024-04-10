@@ -2,85 +2,132 @@ import path from "path";
 import fs from "fs";
 import inquirer from "inquirer";
 
-import { isLoggedIn } from "../config/index.js";
 import {
   createEnv,
+  deleteEnv,
   getAllEnvs,
   pullEnv,
   updateEnv,
 } from "../data/managers/envs.js";
-import { createConfigFile, printColor } from "../utils.js";
+import {
+  createConfigFile,
+  printColor,
+  checkLoginStatus,
+  validateConfig,
+  apiResponseHandler,
+} from "../utils.js";
+import { CONFIG_FILE, PROJECT_NAME } from "../constants.js";
 
-export const getAllEnvsHandler = async () => {
-  const { status, data, msg } = await getAllEnvs();
-  if (!status) {
-    printColor("red", `❌ ${msg}`);
+export const deleteEnvHandler = async () => {
+  if (!checkLoginStatus()) return;
+  const { id } = validateConfig();
+  if (!id) return;
+  const { confirm } = await inquirer.prompt([
+    {
+      type: "confirm",
+      name: "confirm",
+      message: "Are you sure you want to delete this environment?",
+    },
+  ]);
+  if (!confirm) {
+    printColor("red", "❌ Delete operation aborted");
     return;
   }
-  printColor("green", "📦 Available environments");
-  data.forEach(({ name, env_path, env_id }) => {
-    printColor("yellow", `\n| Name: ${name}`);
-    printColor("yellow", `| Env path: ${env_path}`);
-    printColor("yellow", `| ID: ${env_id}`);
-    printColor("blue", "-------------------");
+  const response = await deleteEnv({ id });
+  apiResponseHandler(response, () => {
+    printColor("green", "✅ Environment deleted successfully");
   });
 };
+
+export const getAllEnvsHandler = async () => {
+  const response = await getAllEnvs();
+  apiResponseHandler(response, (data) => {
+    printColor("green", "📦 Available environments");
+    data.forEach(({ name, env_path, env_id }) => {
+      printColor("yellow", `\n| Name: ${name}`);
+      printColor("yellow", `| Env path: ${env_path}`);
+      printColor("yellow", `| ID: ${env_id}`);
+      printColor("blue", "-------------------");
+    });
+  });
+};
+
 export const pullEnvHandler = async () => {
-  if (!isLoggedIn()) {
-    console.log("You need to login to pull environment variables");
-    return;
-  }
-  const configPath = path.join(process.cwd(), "envmon-config.json");
-  if (!fs.existsSync(configPath)) {
-    printColor("red", "❌ envmon repository not initialized");
-    return;
-  }
-  const { id, env_location } = JSON.parse(fs.readFileSync(configPath));
-  const { status, data, msg } = await pullEnv({ id });
-  if (!status) {
-    printColor("red", `❌ ${msg}`);
-    return;
-  }
-  const { env_data } = data;
-  const filePath = path.join(process.cwd(), env_location);
-  fs.writeFileSync(filePath, env_data, "utf-8");
-  printColor("green", "✅ Environment variables pulled successfully");
+  const envContent = validateConfig();
+  if (!envContent) return;
+  const { id, env_location } = envContent;
+  const { password } = await inquirer.prompt([
+    {
+      type: "password",
+      name: "password",
+      message: "Enter your password:",
+      mask: "*",
+    },
+  ]);
+  const response = await pullEnv({ id, password });
+  apiResponseHandler(
+    response,
+    ({ env_data }) => {
+      const filePath = path.join(process.cwd(), env_location);
+      fs.writeFileSync(filePath, env_data, "utf-8");
+      printColor("green", "✅ Environment variables pulled successfully");
+    },
+    async (response) => {
+      const { code } = response;
+      if (code === 400) {
+        const { oneTimePassword } = await inquirer.prompt([
+          {
+            type: "input",
+            name: "oneTimePassword",
+            message: "Enter one time password:",
+          },
+        ]);
+
+        const response = await pullEnv({ id, oneTimePassword, password });
+        apiResponseHandler(response, ({ env_data }) => {
+          const filePath = path.join(process.cwd(), env_location);
+          fs.writeFileSync(filePath, env_data, "utf-8");
+          printColor("green", "✅ Environment variables pulled successfully");
+        });
+      } else {
+        printColor("red", `❌ ${response.msg}`);
+        return;
+      }
+    }
+  );
 };
 
 export const pushEnvHandler = async () => {
-  if (!isLoggedIn()) {
-    printColor("red", "👉 You need to login to push environment variables");
-    return;
-  }
-  const configPath = path.join(process.cwd(), "envmon-config.json");
-  if (!fs.existsSync(configPath)) {
-    printColor("red", "❌ envmon repository not initialized");
-    return;
-  }
-  const { id, env_location } = JSON.parse(fs.readFileSync(configPath));
+  const envContent = validateConfig();
+  if (!envContent) return;
+  const { id, env_location } = envContent;
   const env_data = fs.readFileSync(path.join(process.cwd(), env_location), {
     encoding: "utf-8",
   });
-  const { status, msg } = await updateEnv({ id, env_data });
-  if (!status) {
-    printColor("red", `❌ ${msg}`);
-    return;
-  }
-  printColor("green", "✅ Environment variables pushed successfully");
+
+  const { password } = await inquirer.prompt([
+    {
+      type: "password",
+      name: "password",
+      message: "Enter your password:",
+      mask: "*",
+    },
+  ]);
+  const response = await updateEnv({ id, values: { env_data, password } });
+  apiResponseHandler(response, () => {
+    printColor("green", "✅ Environment variables pushed successfully");
+  });
 };
 
 export const initHandler = async () => {
-  if (!isLoggedIn()) {
-    printColor("red", "👉 You need to login before initializing envmon");
-    return;
-  }
-  const configPath = path.join(process.cwd(), "envmon-config.json");
+  if (!checkLoginStatus()) return;
+  const configPath = path.join(process.cwd(), CONFIG_FILE);
   if (fs.existsSync(configPath)) {
-    printColor("yellow", "👉 envmon repository already initialized");
+    printColor("red", `👉 ${PROJECT_NAME} repository already initialized`);
     return;
   }
 
-  printColor("green", "🚀 Initializing envmon repository");
+  printColor("green", `🚀 Initializing ${PROJECT_NAME} repository`);
   const { name, env_path, password } = await inquirer.prompt([
     {
       type: "input",
@@ -97,7 +144,7 @@ export const initHandler = async () => {
     { type: "password", name: "password", message: "Enter your password:" },
   ]);
 
-  printColor("green", "⚡Creating envmon repository");
+  printColor("green", `⚡Creating ${PROJECT_NAME} repository`);
 
   const filePath = path.join(process.cwd(), env_path);
   if (!fs.existsSync(filePath)) {
@@ -105,11 +152,8 @@ export const initHandler = async () => {
     fs.writeFileSync(filePath, "");
   }
   const response = await createEnv({ name, env_path, password });
-  const { status, data, msg } = response;
-  if (!status) {
-    printColor("red", `❌ ${msg}`);
-    return;
-  }
-  createConfigFile(data);
-  printColor("green", "✅ envmon repository initialized successfully");
+  apiResponseHandler(response, () => {
+    createConfigFile({ env_id: response.data.env_id, name, env_path });
+    printColor("green", `✅ ${PROJECT_NAME} repository created successfully`);
+  });
 };

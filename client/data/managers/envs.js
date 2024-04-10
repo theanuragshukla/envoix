@@ -1,7 +1,8 @@
+import { SERVER_URL } from "../../constants.js";
 import { getClient } from "../client.js";
 import { reqModal } from "./auth.js";
 
-const serverURL = process.env.SERVER_URL || "http://localhost:8000";
+const serverURL = SERVER_URL || "http://localhost:8000";
 const baseURL = `${serverURL}/envs`;
 
 export const createEnv = (values) => {
@@ -12,10 +13,16 @@ export const getAllEnvs = () => {
   return reqModal(() => getClient(baseURL).get("/all"));
 };
 
-export const pullEnv = ({id}) => {
-  return reqModal(() => getClient(baseURL).get(`/${id}`));
+export const pullEnv = ({ id, password, oneTimePassword }) => {
+  return reqModal(() =>
+    getClient(baseURL).post(`/${id}`, { password, oneTimePassword })
+  );
 };
 
-export const updateEnv = ({id, values}) => {
+export const updateEnv = ({ id, values }) => {
   return reqModal(() => getClient(baseURL).post(`/${id}/update`, values));
+};
+
+export const deleteEnv = ({ id }) => {
+  return reqModal(() => getClient(baseURL).get(`/${id}/delete`));
 };

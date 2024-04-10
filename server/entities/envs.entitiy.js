@@ -11,7 +11,6 @@ const envs = new EntitySchema({
     },
     env_id: {
       type: "uuid",
-      generated: "uuid",
       unique: true,
     },
     env_path: {
@@ -22,7 +21,7 @@ const envs = new EntitySchema({
     },
     env_data: {
       type: "text",
-      default:""
+      default: "",
     },
     owner: {
       type: "varchar",

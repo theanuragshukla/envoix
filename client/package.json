@@ -1,10 +1,11 @@
 {
-  "name": "envsync",
-  "version": "1.0.0",
-  "description": "EnvSync is a collaborative tool to easily share, sync and manage environment variables between developers and teams.",
+  "name": "envoix",
+  "version": "1.0.1",
+  "description": "Envoix is a collaborative tool to easily share, sync and manage environment variables between developers and teams.",
+  "type": "module",
   "main": "index.js",
   "bin": {
-    "envsync": "index.js"
+    "envoix": "index.js"
   },
   "dependencies": {
     "axios": "^1.6.8",
@@ -20,12 +21,12 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/theanuragshukla/envSync.git"
+    "url": "git+https://github.com/theanuragshukla/envoix.git"
   },
   "author": "https://github.com/theanuragshukla",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/theanuragshukla/envSync/issues"
+    "url": "https://github.com/theanuragshukla/envoix/issues"
   },
-  "homepage": "https://github.com/theanuragshukla/envSync#readme"
+  "homepage": "https://github.com/theanuragshukla/envoix#readme"
 }
