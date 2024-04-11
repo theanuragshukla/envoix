@@ -77,12 +77,12 @@ This command includes all the authentication related subcommands
 ### User Permissions
 - This commands follows various subcommands for managing user permissions on the environment
 - The permissions allowed can be any combination of the following list of permissions:
-    - pull: Read the current environment variables from the server
-    - push: Change/Update the environment variables on the server
-    - add_user: Add a new user with certain set of permissions
-    - remove_user: Remove a user and their permissions
-    - update_user: Update other user permissions 
-    - admin: All the above permissions + some extra ones
+    - `pull`: Read the current environment variables from the server
+    - `push`: Change/Update the environment variables on the server
+    - `add_user`: Add a new user with certain set of permissions
+    - `remove_user`: Remove a user and their permissions
+    - `update_user`: Update other user permissions 
+    - `admin`: All the above permissions + some extra ones
         - list all users with permission
         - delete the environment
 
@@ -104,11 +104,11 @@ This command includes all the authentication related subcommands
 
 ### Environment Settings
 - These are the core features of this library which provides functionality for managing environments
-    - init: Create a new environment config
-    - push: Push the current config to server
-    - pull: Pull the changes from server
-    - list: List all the environment created by current user
-    - delete: Delete current environment
+    - `init`: Create a new environment config
+    - `push`: Push the current config to server
+    - `pull`: Pull the changes from server
+    - `list`: List all the environment created by current user
+    - `delete`: Delete current environment
 
 #### Usage
 
@@ -143,7 +143,7 @@ The user's password is the most important asset in securing other relevant data,
 ### Environment Variables/data
 
 Here comes the fun part, 
-> It took me more days to seecurly store the env variables than coding all the other features
+> It took me more days to securely store the env variables than coding all the other features
 
 Okay, so what's the keyword here ?? Its `key wrapping`
 
@@ -184,3 +184,25 @@ Considering above requirements, we don't have a lot of options.
 6. During the first pull from the user_X, OTP is also asked and then `KEK(X)` is replaced by `encrypt(MEK, pass_X)`
 
 7. Afterwards, Each push/pull action is performed by derived MEK from User's KEK.
+
+# Proposed features
+
+- Multiple environments like prod, dev, etc in same config
+- storing env history
+
+# Self Hosting
+
+The `Envoix-server` can be self hosted and it can be integrated inside this library. See the official repo at [theanuragshukla/envoix-server](https://github.com/theanuragshukla/envoix-server) for detailed instructions
+
+# Contributions
+
+If you'd like to improve the functionality and security of this library, feel free to raise an issue and then we can work on that together. Also try working on the [proposed features](#Propsed-Features)
+
+# FAQs
+
+1. Where is the server ??
+    - As of now, I've hosted the server at `https://envoix.anurags.tech` and It should work fine for small userbase.
+
+2. Can it be self hosted ?
+    - For private use or within an organisation, I'd suggest to self host. It'll be good for my small server and your special use case.
+ 
