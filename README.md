@@ -196,7 +196,7 @@ The `Envoix-server` can be self hosted and it can be integrated inside this libr
 
 # Contributions
 
-If you'd like to improve the functionality and security of this library, feel free to raise an issue and then we can work on that together. Also try working on the [proposed features](#Propsed-Features)
+If you'd like to improve the functionality and security of this library, feel free to raise an issue and then we can work on that together. Also try working on the [proposed features](#propsed-features)
 
 # FAQs
 
