@@ -8,7 +8,7 @@ It removes the overhead of sending env variables to each developer in your team 
 1. easy user authentication
 2. easy setup (just one command)
 3. remote storage for all the variables
-4. Encrypted (coming soon)
+4. Encrypted and Secure
 5. Add other users to the project
 6. Manage User Permissions (Push, Pull, Admin, Add_Users, Remove_Users)
 7. No hassles with GUI
