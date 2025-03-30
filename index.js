@@ -9,7 +9,7 @@ import {
   signupHandler,
 } from "./handlers/authHandlers.js";
 import {
-    deleteEnvHandler,
+  deleteEnvHandler,
   getAllEnvsHandler,
   initHandler,
   pullEnvHandler,

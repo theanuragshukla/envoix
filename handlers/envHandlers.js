@@ -15,6 +15,7 @@ import {
   checkLoginStatus,
   validateConfig,
   apiResponseHandler,
+  fileExistsRecursively,
 } from "../utils.js";
 import { CONFIG_FILE, PROJECT_NAME } from "../constants.js";
 
@@ -121,9 +122,14 @@ export const pushEnvHandler = async () => {
 
 export const initHandler = async () => {
   if (!checkLoginStatus()) return;
-  const configPath = path.join(process.cwd(), CONFIG_FILE);
-  if (fs.existsSync(configPath)) {
-    printColor("red", `👉 ${PROJECT_NAME} repository already initialized`);
+
+  const existingFilePath = fileExistsRecursively(process.cwd(), CONFIG_FILE);
+
+  if (existingFilePath) {
+    printColor(
+      "red",
+      `👉 ${PROJECT_NAME} repository already initialized at ${existingFilePath}`
+    );
     return;
   }
 
@@ -147,10 +153,7 @@ export const initHandler = async () => {
   printColor("green", `⚡Creating ${PROJECT_NAME} repository`);
 
   const filePath = path.join(process.cwd(), env_path);
-  if (!fs.existsSync(filePath)) {
-    printColor("red", "👉 Environment file not found, creating one...");
-    fs.writeFileSync(filePath, "");
-  }
+  fs.writeFileSync(filePath, "");
   const response = await createEnv({ name, env_path, password });
   apiResponseHandler(response, () => {
     createConfigFile({ env_id: response.data.env_id, name, env_path });

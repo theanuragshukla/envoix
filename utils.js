@@ -28,8 +28,8 @@ export const checkLoginStatus = () => {
 };
 
 export const checkIfInit = () => {
-  const configPath = path.join(process.cwd(), CONFIG_FILE);
-  if (!fs.existsSync(configPath)) {
+  const configPath = fileExistsRecursively(process.cwd(), CONFIG_FILE);
+  if (!configPath) {
     printColor("red", `❌ ${PROJECT_NAME} repository not initialized`);
     return false;
   }
@@ -38,7 +38,10 @@ export const checkIfInit = () => {
 
 export const parseConfigFile = () => {
   try {
-    const configPath = path.join(process.cwd(), CONFIG_FILE);
+    const configPath = fileExistsRecursively(process.cwd(), CONFIG_FILE);
+    if (!configPath) {
+      return null;
+    }
     return JSON.parse(fs.readFileSync(configPath));
   } catch (e) {
     return null;
@@ -60,7 +63,7 @@ export const validateConfig = () => {
 export const apiResponseHandler = (
   response,
   successHandler,
-  failureHandler = ({msg}) => {
+  failureHandler = ({ msg }) => {
     printColor("red", `❌ ${msg}`);
     return;
   }
@@ -70,4 +73,18 @@ export const apiResponseHandler = (
     return failureHandler(response);
   }
   successHandler(data);
+};
+
+export const fileExistsRecursively = (currentDir, targetFile) => {
+  const targetPath = path.join(currentDir, targetFile);
+  if (fs.existsSync(targetPath)) {
+    return targetPath;
+  }
+
+  const parentDir = path.dirname(currentDir);
+  if (parentDir === currentDir) {
+    return null;
+  }
+
+  return fileExistsRecursively(parentDir, targetFile);
 };

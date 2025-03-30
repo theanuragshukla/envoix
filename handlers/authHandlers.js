@@ -12,7 +12,8 @@ import { login, signup } from "../data/managers/auth.js";
 function handleLoginResponse(res) {
   const { status, data, msg } = res;
   if (!status) {
-    printColor("red", msg);
+    const info = data?.errors?.[0]?.msg || data?.msg || msg;
+    printColor("red", `❌ Error: ${info}`);
     return;
   }
   const { name, email, uid, token } = data;
