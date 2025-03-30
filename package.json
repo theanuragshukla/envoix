@@ -1,6 +1,6 @@
 {
   "name": "envoix",
-  "version": "3.1.0",
+  "version": "3.1.1",
   "description": "Envoix is a collaborative tool to easily share, sync and manage environment variables between developers and teams.",
   "type": "module",
   "main": "index.js",
