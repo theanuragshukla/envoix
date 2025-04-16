@@ -16,7 +16,7 @@ function handleLoginResponse(res) {
     printColor("red", `❌ Error: ${info}`);
     return;
   }
-  const { name, email, uid, token } = data;
+  const { token, user: {name, email, uid} } = data;
   setAuthToken(token);
   setProfile({ name, email, uid });
   printColor("green", "\n✅ Login successful");

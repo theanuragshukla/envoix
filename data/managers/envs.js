@@ -6,23 +6,23 @@ const serverURL = SERVER_URL || "http://localhost:8000";
 const baseURL = `${serverURL}/envs`;
 
 export const createEnv = (values) => {
-  return reqModal(() => getClient(baseURL).post("/", values));
+  return reqModal(() => getClient(baseURL).post("/create", values));
 };
 
 export const getAllEnvs = () => {
-  return reqModal(() => getClient(baseURL).get("/"));
+  return reqModal(() => getClient(baseURL).get("/all"));
 };
 
 export const pullEnv = ({ id, password, oneTimePassword }) => {
   return reqModal(() =>
-    getClient(baseURL).post(`/${id}`, { password, oneTimePassword })
+    getClient(baseURL).post(`/${id}/pull`, { password, oneTimePassword })
   );
 };
 
 export const updateEnv = ({ id, values }) => {
-  return reqModal(() => getClient(baseURL).put(`/${id}`, values));
+  return reqModal(() => getClient(baseURL).put(`/${id}/push`, values));
 };
 
 export const deleteEnv = ({ id }) => {
-  return reqModal(() => getClient(baseURL).delete(`/${id}`));
+  return reqModal(() => getClient(baseURL).delete(`/${id}/delete`));
 };
