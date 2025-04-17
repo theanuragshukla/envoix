@@ -7,6 +7,7 @@ import {
   updateUser,
 } from "../data/managers/permissions.js";
 import { apiResponseHandler, printColor, validateConfig } from "../utils.js";
+import { ALLOWED_PERMISSIONS } from "../constants.js";
 
 export const addUserHandler = async () => {
   const envContent = validateConfig();
@@ -19,14 +20,7 @@ export const addUserHandler = async () => {
       name: "permission",
       message: "Select permissions",
       default: ["pull"],
-      choices: [
-        "pull",
-        "push",
-        "add_user",
-        "remove_user",
-        "update_user",
-        "admin",
-      ],
+      choices: ALLOWED_PERMISSIONS,
     },
     {
       type: "input",
@@ -94,14 +88,7 @@ export const updateUserHandler = async () => {
       name: "permission",
       message: "Select permissions",
       default: ["pull"],
-      choices: [
-        "pull",
-        "push",
-        "add_user",
-        "remove_user",
-        "update_user",
-        "admin",
-      ],
+      choices: ALLOWED_PERMISSIONS,
     },
   ]);
   const response = await updateUser({
