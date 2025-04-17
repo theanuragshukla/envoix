@@ -153,7 +153,9 @@ export const initHandler = async () => {
   printColor("green", `⚡Creating ${PROJECT_NAME} repository`);
 
   const filePath = path.join(process.cwd(), env_path);
-  fs.writeFileSync(filePath, "");
+  if(!fs.existsSync(filePath)){
+    fs.writeFileSync(filePath, "");
+  }
   const response = await createEnv({ name, env_path, password });
   apiResponseHandler(response, () => {
     createConfigFile({ env_id: response.data.env_id, name, env_path });
